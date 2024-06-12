@@ -19,7 +19,7 @@ class CatViewSet(viewsets.ModelViewSet):
         if self.action == 'retrieve':
             # Вернём обновлённый перечень используемых пермишенов
             return (ReadOnly(),)
-        # Для остальных ситуаций оставим тек перечень пермишенов без изменений
+        # Для остальных ситуаций оставим текущий перечень пермишенов без изм
         return super().get_permissions()
 
 
