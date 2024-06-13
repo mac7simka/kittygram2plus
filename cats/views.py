@@ -1,9 +1,10 @@
+from django_filters.rest_framework import DjangoFilterBackend
+
+from rest_framework import filters
 from rest_framework import viewsets
 from rest_framework.throttling import ScopedRateThrottle
-from rest_framework.pagination import LimitOffsetPagination
 
 from .throttling import WorkingHoursRateThrottle
-
 from .permissions import OwnerOrReadOnly, ReadOnly
 
 from .models import Achievement, Cat, User
@@ -19,9 +20,16 @@ class CatViewSet(viewsets.ModelViewSet):
     throttle_classes = (WorkingHoursRateThrottle, ScopedRateThrottle)
     # А далее применится лимит low_request
     throttle_scope = 'low_request'
-    # Даже если на уровне проекта установлен PageNumberPagination
-    # Для котиков будет работать LimitOffsetPagination
-    pagination_class = LimitOffsetPagination
+    # Указываем фильтрующий бэкенд DjangoFilterBackend
+    # Из библиотеки django-filter
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    # Временно отключим пагинацию на уровне вьюсета,
+    # так будет удобнее настраивать фильтрацию
+    pagination_class = None
+    # Фильтровать будем по полям color и birth_year модели Cat
+    filterset_fields = ('color', 'birth_year')
+    search_fields = ('name', 'achievements__name', 'owner__username')
+    ordering_fields = ('name', 'birth_year')
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
