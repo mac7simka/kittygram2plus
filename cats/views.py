@@ -1,8 +1,11 @@
+from django_filters.rest_framework import DjangoFilterBackend
+
+from rest_framework import filters
 from rest_framework import viewsets
 from rest_framework.throttling import ScopedRateThrottle
 
 from .throttling import WorkingHoursRateThrottle
-from .pagination import CatsPagination
+
 from .permissions import OwnerOrReadOnly, ReadOnly
 
 from .models import Achievement, Cat, User
@@ -18,8 +21,9 @@ class CatViewSet(viewsets.ModelViewSet):
     throttle_classes = (WorkingHoursRateThrottle, ScopedRateThrottle)
     # А далее применится лимит low_request
     throttle_scope = 'low_request'
-    # Вот он наш собственный класс пагинации с page_size=20
-    pagination_class = CatsPagination
+    # Даже если на уровне проекта установлен PageNumberPagination
+    # Для котиков будет работать LimitOffsetPagination
+    pagination_class = LimitOffsetPagination
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
